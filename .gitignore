@@ -1,3 +1,14 @@
+# Site-specific / private: real domain, addresses, spreadsheet ID
 STATUS.md
 src/Config.gs
 gmail-filter.xml
+
+# Local tooling and credentials
+.clasp.json
+.clasprc.json
+.env
+.env.*
+*.pem
+*.key
+.claude/
+.DS_Store

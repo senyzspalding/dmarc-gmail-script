@@ -64,11 +64,28 @@ function readRows_(ss, name) {
   return sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
 }
 
+/**
+ * Neutralizes spreadsheet formula injection. Report fields come from outside email
+ * (org names, report IDs, header-from domains) and DNS (PTR names), so an attacker can
+ * make one start with "=", "+", "-" or "@" and have Sheets run it as a formula
+ * (e.g. =IMPORTXML(...) or =HYPERLINK(...)). Strings like that get a leading apostrophe,
+ * which makes Sheets store them as literal text. Numbers and Dates pass through.
+ */
+function safeCell_(v) {
+  if (typeof v !== 'string') return v;
+  return /^\s*[=+\-@]|^[\t\r]/.test(v) ? "'" + v : v;
+}
+
+/** safeCell_ applied to every cell of every row. Use for every write of non-constant data. */
+function safeRows_(rows) {
+  return rows.map(function (r) { return r.map(safeCell_); });
+}
+
 /** Appends rows below the last used row in one write. No-op for an empty list. */
 function appendRows_(ss, name, rows) {
   if (!rows.length) return;
   const sh = sheet_(ss, name);
-  sh.getRange(sh.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
+  sh.getRange(sh.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(safeRows_(rows));
 }
 
 /** Set of report_key values already stored, for de-duplication. */
@@ -119,7 +136,7 @@ function saveSources_(ss, sources) {
   });
   if (!rows.length) return;
   for (let i = 0; i < rows.length; i++) if (!rows[i]) rows[i] = new Array(SOURCES_SCRIPT_COLS_).fill('');
-  sh.getRange(2, 1, rows.length, SOURCES_SCRIPT_COLS_).setValues(rows);
+  sh.getRange(2, 1, rows.length, SOURCES_SCRIPT_COLS_).setValues(safeRows_(rows));
 }
 
 /** Reports-tab row for a parsed report (columns as SHEETS_.Reports). */

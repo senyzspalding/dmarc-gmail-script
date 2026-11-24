@@ -237,11 +237,19 @@ All in `src/Config.gs` (copied from `src/Config.example.gs`, not committed):
 
 - dmarc-bot is a dedicated account with 2-step verification and only Gmail, Sheets and
   Apps Script in use.
-- Report data (source IPs, sending domains) is stored only in the spreadsheet, shared
-  with nobody by default.
+- Report data (source IPs, reverse-DNS names, sending domains) is stored only in the
+  spreadsheet, shared with nobody by default. It describes your mail infrastructure and
+  which services can send as your domain, so keep sharing restricted to named people.
 - Outbound calls: DNS names and IPs to `dns.google`; nothing else.
 - Alert email content is HTML-escaped (`esc_`).
+- **Spreadsheet formula injection.** Report fields (org names, report IDs, header-from,
+  PTR names) are attacker-influenced. `safeCell_` / `safeRows_` in `Store.gs` prefix any
+  string that starts with `=`, `+`, `-`, `@` (optionally after whitespace) or a tab/CR with
+  `'`, so Sheets stores it as text. Every sheet write goes through `appendRows_` or
+  `saveSources_`, which apply it. Any new write path must do the same.
 - No secrets are stored in the code. The spreadsheet ID lives in script properties.
+- Site-specific values (domain, alert address, spreadsheet link) are kept in git-ignored
+  files only, so the repository can be public.
 
 ## 10. Limits and known constraints
 

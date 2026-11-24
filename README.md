@@ -16,6 +16,10 @@ No mail leaves Google. The only outside calls are DNS lookups to `dns.google`.
 For architecture, data model, alert rules and operations, see the
 [system document](docs/SYSTEM.md).
 
+![Sample alert email (made-up data)](docs/images/sample-alert.png)
+
+*A sample alert email. The data is made up: `example.org` and the reserved documentation range `203.0.113.0/24`.*
+
 ## Alerts
 
 | Severity | When | What it usually means |
@@ -85,6 +89,11 @@ To push from this folder instead of pasting, use [clasp](https://github.com/goog
 - Threads in Gmail move from `DMARC` to `DMARC/processed`.
 - `DMARC/error` holds reports that failed to parse; see Apps Script → Executions for the error.
   `DMARC/unparsed` holds messages that had no aggregate report, such as forensic (`ruf`) reports.
+
+## Privacy and security
+- **Keep the spreadsheet private.** It holds source IPs, reverse-DNS names and which services send as your domain, which is useful reconnaissance for an attacker. Share it only with the people who need it, and never "anyone with the link".
+- Report fields come from outside email and DNS, so they are untrusted. Before anything is written to Sheets, any text starting with `=`, `+`, `-` or `@` gets a leading apostrophe so it is stored as literal text and can't run as a formula (`safeCell_` in `src/Store.gs`). Alert emails are HTML-escaped.
+- Your real domain, addresses and spreadsheet ID live only in the git-ignored files `src/Config.gs`, `gmail-filter.xml` and `STATUS.md`. Don't commit them.
 
 ## Notes and limits
 - History starts when dmarc-bot joins the group. Earlier reports aren't in its mailbox.
