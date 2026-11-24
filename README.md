@@ -104,3 +104,7 @@ To push from this folder instead of pasting, use [clasp](https://github.com/goog
   The SPF expansion is cached for 6 hours.
 - Sheets holds up to 10 million cells. At about 18 cells per record, that's
   years of reports for a domain this size. Delete old `Records` rows if it ever gets close.
+
+## License
+
+[MIT](LICENSE)
